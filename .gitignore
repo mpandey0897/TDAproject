@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings (if applicable)
+.vscode/
+
+# macOS system files
+.DS_Store
+
+# Python cache
+*.log
+
+# Ignore data files (like large point clouds)
+data/*.txt
+
+# Ignore OS-generated files
+Thumbs.db
+ehthumbs.db
