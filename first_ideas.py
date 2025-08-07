@@ -28,7 +28,7 @@ print('bunny size:', bunny.shape)
 
 #pick random n indices
 np.random.seed(42)
-idx = np.random.choice(bunny.shape[0], size=400, replace=False)
+idx = np.random.choice(bunny.shape[0], size=40, replace=False)
 print('idx:',idx, 'len(idx):', len(idx))
 
 print(bunny.iloc[idx])
@@ -68,6 +68,46 @@ diag = acx.persistence()
 
 n = len(idx)
 
+# Convert to DataFrame for convenience
+birth_death_data = [
+    {'dimension': dim, 'birth': birth, 'death': death}
+    for dim, (birth, death) in diag
+    if not math.isinf(death)  # Optional: exclude infinite deaths
+]
+
+df_pd = pd.DataFrame(birth_death_data)
+print(df_pd.head())
+print('shape:\n',df_pd.shape)
+# filter out pairs with birth below threshold eps= 0.0001
+eps = 0.0001
+df_pd = df_pd[df_pd['birth'] >= eps]
+print('shape after filtering:\n',df_pd.shape)
+
+#birth divided by death histogram
+plt.figure(figsize=(8, 6))
+plt.hist(df_pd['birth'] / df_pd['death'], bins=50, alpha=0.7, color='blue', edgecolor='black')
+plt.xlabel('Birth/Death Ratio')
+plt.ylabel('Frequency')
+plt.title(f'Birth/Death Ratio Histogram of Bunny n={n}')
+plt.xlim(0, 1)
+plt.grid(True)
+#plt.savefig(f"Bunny_{n}_birth_death_ratio_histogram.png", dpi=300, bbox_inches='tight')
+plt.show()
+
+
+# scatter plot of persistence pairs
+plt.figure(figsize=(8, 6))
+plt.scatter(df_pd['birth'], df_pd['death'], alpha=0.5, s=10)
+plt.xlabel('Birth')
+plt.ylabel('Death')
+plt.title(f'Persistence Pairs of Bunny n={n}')
+plt.xlim(0, df_pd['birth'].max() * 1.1)
+plt.ylim(0, df_pd['death'].max() * 1.1)
+plt.grid(True)
+plt.savefig(f"Bunny_{n}_persistence_pairs.png", dpi=300, bbox_inches='tight')
+plt.show()
+
+
 # 2. Persistence Diagram
 gudhi.plot_persistence_diagram(diag)
 plt.title(f'Persistence Diagram of Bunny n={n}')
@@ -96,3 +136,4 @@ if diag_H2:
     plt.show()
 else:
     print("No finite H2 intervals to plot!")
+    
