@@ -28,7 +28,7 @@ print('bunny size:', bunny.shape)
 
 #pick random n indices
 np.random.seed(42)
-idx = np.random.choice(bunny.shape[0], size=40, replace=False)
+idx = np.random.choice(bunny.shape[0], size=4000, replace=False) #35947
 print('idx:',idx, 'len(idx):', len(idx))
 
 print(bunny.iloc[idx])
@@ -40,8 +40,23 @@ print('bunny_sub:\n',bunny_sub.head())
 
 # Convert DataFrame to float NumPy array for gudhi
 bunny_points = bunny[['x', 'y', 'z']].astype(float).to_numpy()
+print('type of bunny_points:', type(bunny_points))
 print('bunny_points:\n', bunny_points)
 
+'''
+#find minimal distance between two points
+def min_distance(points):
+    min_dist = float('inf')
+    for i in range(len(points)):
+        for j in range(i + 1, len(points)):
+            dist = np.linalg.norm(points[i] - points[j])
+            if dist < min_dist:
+                min_dist = dist
+    return min_dist
+min_dist = min_distance(bunny_points[0:100])
+print('min_dist:', min_dist)  # Check first 1000 points for speed
+print('check:')
+'''
 
 #'''
 # Create a 3D scatter plot
@@ -78,20 +93,40 @@ birth_death_data = [
 df_pd = pd.DataFrame(birth_death_data)
 print(df_pd.head())
 print('shape:\n',df_pd.shape)
+#filter out dimension 0 this excludes 0 cycles (connected components)
+df_pd = df_pd[df_pd['dimension'] > 0]
+df_pdH1 = df_pd[df_pd['dimension'] == 1]
+df_pdH2 = df_pd[df_pd['dimension'] == 2]
+#two death divided by birth histograms for H1 and H2
+plt.figure(figsize=(8, 6))
+plt.hist(np.log(np.log(df_pdH1['death'] / df_pdH1['birth'])), bins=100, alpha=0.7, color='blue', edgecolor='black', label='H1')
+plt.hist(np.log(np.log(df_pdH2['death'] / df_pdH2['birth'])), bins=100, alpha=0.7, color='orange', edgecolor='black', label='H2')
+plt.xlabel('log(log(Death/Birth))')
+plt.ylabel('Frequency')
+plt.title(f'log(log(Death/Birth)) Histogram of Bunny n={n}')
+plt.xlim(-20, 5)
+plt.legend()
+plt.grid(True)
+plt.savefig(f"Bunny_{n}_loglog_death_birth_histogram.png", dpi=300, bbox_inches='tight')
+plt.show()
+
+print(df_pd.head())
+print('shape:\n',df_pd.shape)
+
 # filter out pairs with birth below threshold eps= 0.0001
-eps = 0.0001
-df_pd = df_pd[df_pd['birth'] >= eps]
-print('shape after filtering:\n',df_pd.shape)
+#eps = 0.0000001
+#df_pd = df_pd[df_pd['birth'] >= eps]
+#print('shape after filtering:\n',df_pd.shape)
 
 #birth divided by death histogram
 plt.figure(figsize=(8, 6))
-plt.hist(df_pd['birth'] / df_pd['death'], bins=50, alpha=0.7, color='blue', edgecolor='black')
+plt.hist(np.log(np.log(df_pd['death'] / df_pd['birth'])), bins=100, alpha=0.7, color='blue', edgecolor='black')
 plt.xlabel('Birth/Death Ratio')
 plt.ylabel('Frequency')
-plt.title(f'Birth/Death Ratio Histogram of Bunny n={n}')
-plt.xlim(0, 1)
+plt.title(f'log(log(Death/Birth)) Ratio Histogram of Bunny n={n}')
+plt.xlim(-20, 5)
 plt.grid(True)
-#plt.savefig(f"Bunny_{n}_birth_death_ratio_histogram.png", dpi=300, bbox_inches='tight')
+plt.savefig(f"Bunny_{n}_loglog_death_birth_ratio_histogram.png", dpi=300, bbox_inches='tight')
 plt.show()
 
 
